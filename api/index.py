@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, Header
+from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 from pydantic import BaseModel
 
@@ -8,8 +9,18 @@ app = FastAPI(
     version="1.0.0",
 )
 
+# Add CORS middleware configuration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
+
 class VerificationResponse(BaseModel):
     result: dict = {"isValid": bool}
+    error: Optional[str] = None
 
 DEMO_COMPLETED_TASKS = {
     # Demo wallet addresses
@@ -38,8 +49,8 @@ async def verify_task(
     # Demo implementation - check if address exists in demo completed tasks
     is_valid = address in DEMO_COMPLETED_TASKS
     
-    return VerificationResponse(result={"isValid": is_valid})
+    return VerificationResponse(result={"isValid": is_valid}, error=None)
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to TaskOn Verification API Demo"} 
+    return {"message": "Welcome to TaskOn Verification API Demo"}

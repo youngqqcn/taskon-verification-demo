@@ -73,6 +73,48 @@ Use the Swagger UI at `/docs` to test the API endpoints. The demo includes sever
 - Telegram ID: `6881505111`
 - Email: `demo@taskon.xyz`
 
+## 5. How to Set API Task
+
+<div style="display: flex; gap: 20px; margin-bottom: 30px;">
+  <div style="flex: 1;">
+    <h3>1. Slect API Task</h3>
+    - Go to the TaskOn dashboard and click on the "API Task" tab.<br/>
+    - Click on the "Create API Task" button.
+    <br clear="left" />
+    <img src="./statics/img/img0.png" width="400" />
+  </div>
+
+  <div style="flex: 1;">
+    <h3>2. Fill in the Details</h3>
+    - Complete all required fields & Upload the task icon.<br/>
+    - Click on the "Set API URL" button.
+    <br clear="left" />
+    <img src="./statics/img/img1.png" width="400" />
+  </div>
+</div>
+
+<div style="display: flex; gap: 20px; margin-bottom: 30px;">
+  <div style="flex: 1;">
+    <h3>3. Fill the api url</h3>
+    - URL: If you use this repo and vercel, it shoud be like this: `https://xxx.vercel.app/api/task/verification`<br/>
+    - [Optional] Bearer Token: Enable this to restrict API access to TaskOn only.
+    <br clear="left" />
+    <img src="./statics/img/img2.jpg" width="400" />
+  </div>
+
+  <div style="flex: 1;">
+    <h3>4. Verify Configuration & Confirm Your Settings</h3>
+    - **Purpose:** Ensure everything works smoothly.<br/>
+    - **Provide:**<br/>
+        1. User ID of a task completer<br/>
+        2. User ID of a non-completer<br/>
+    - Think of it as a "**hero**" vs "**zero**" scenario.<br/>
+    - After verification, give it a thumbs up!
+    <br clear="left" />
+    <img src="./statics/img/img3.png" width="400" />
+  </div>
+</div>
+
 ## Support
 
 For questions or support, please refer to the TaskOn documentation or contact the TaskOn team.
