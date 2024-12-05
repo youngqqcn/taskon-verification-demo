@@ -1,10 +1,12 @@
-from fastapi import FastAPI, HTTPException, Header
+from contextlib import contextmanager
+from fastapi import Depends, FastAPI, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 from pydantic import BaseModel
 import pymysql
 import os
 from dotenv import load_dotenv
+import traceback
 import base58
 
 # 加载 .env 文件中的环境变量
@@ -24,6 +26,27 @@ def is_valid_solana_address(address):
     except ValueError:
         # 如果解码失败，则地址无效
         return False
+
+
+@contextmanager
+def get_db_connection():
+    connection = pymysql.connect(
+        host=os.getenv("DB_HOST"),
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        database=os.getenv("DB_NAME"),
+        cursorclass=pymysql.cursors.DictCursor,
+    )
+    try:
+        yield connection
+    finally:
+        connection.close()
+
+
+# 依赖注入方式提供数据库连接
+def get_db():
+    with get_db_connection() as connection:
+        yield connection
 
 
 connection = pymysql.connect(
@@ -74,30 +97,37 @@ class VerificationResponse(BaseModel):
     description="Verify if a user has completed the task based on their wallet address or social media ID",
 )
 async def verify_task(
-    address: str, authorization: Optional[str] = Header(None)
+    address: str,
+    # authorization: Optional[str] = Header(None),
+    db=Depends(get_db),
 ) -> VerificationResponse:
-    print("地址:", address)
-    is_valid = False
-    if not is_valid_solana_address(address):
-        print("地址非法")
-        return VerificationResponse(
-            result={"isValid": is_valid}, error="invalid solana address"
-        )
+    try:
+        print("地址:", address)
+        is_valid = False
+        if not is_valid_solana_address(address):
+            print("地址非法")
+            return VerificationResponse(
+                result={"isValid": is_valid}, error="invalid solana address"
+            )
 
-    cursor = connection.cursor()
+        # cursor = connection.cursor()
+        cursor = db.cursor()
 
-    # 执行 SQL 查询
-    query = "SELECT * FROM user_info WHERE address = %s"
-    cursor.execute(query, (address,))
+        # 执行 SQL 查询
+        query = "SELECT * FROM user_info WHERE address = %s"
+        cursor.execute(query, (address,))
 
-    # 获取查询结果
-    # print("===========")
-    results = cursor.fetchall()
-    print("result: {}".format(results))
-    if results and len(results) > 0:
-        is_valid = True
+        # 获取查询结果
+        # print("===========")
+        results = cursor.fetchall()
+        print("result: {}".format(results))
+        if results and len(results) > 0:
+            is_valid = True
 
-    return VerificationResponse(result={"isValid": is_valid}, error=None)
+        return VerificationResponse(result={"isValid": is_valid}, error=None)
+    except Exception as e:
+        traceback.print_exc()
+        return VerificationResponse(result={"isValid": False}, error=None)
 
 
 @app.get("/")
