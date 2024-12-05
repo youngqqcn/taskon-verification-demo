@@ -79,6 +79,7 @@ async def verify_task(
     print("地址:", address)
     is_valid = False
     if not is_valid_solana_address(address):
+        print("地址非法")
         return VerificationResponse(
             result={"isValid": is_valid}, error="invalid solana address"
         )
@@ -86,12 +87,13 @@ async def verify_task(
     cursor = connection.cursor()
 
     # 执行 SQL 查询
-    query = "SELECT * FROM user_info WHERE address = %s"
+    query = "SELECT * FROM user_info WHERE address = '%s'"
     cursor.execute(query, (address,))
 
     # 获取查询结果
     # print("===========")
     results = cursor.fetchall()
+    print("result: {}".format(results))
     if results and len(results) > 0:
         is_valid = True
 
