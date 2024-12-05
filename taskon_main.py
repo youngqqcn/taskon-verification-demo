@@ -103,10 +103,11 @@ async def verify_task(
     # authorization: Optional[str] = Header(None),
     db=Depends(get_db),
 ) -> VerificationResponse:
+    print("地址:", address)
+    addr = address.strip().lower()
     try:
-        print("地址:", address)
         is_valid = False
-        if not is_valid_solana_address(address):
+        if not is_valid_solana_address(addr):
             print("地址非法")
             return VerificationResponse(
                 result={"isValid": is_valid}, error="invalid solana address"
@@ -117,7 +118,7 @@ async def verify_task(
 
         # 执行 SQL 查询
         query = "SELECT * FROM user_info WHERE address = %s"
-        cursor.execute(query, (address,))
+        cursor.execute(query, (addr,))
 
         # 获取查询结果
         # print("===========")
