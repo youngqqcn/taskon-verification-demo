@@ -87,7 +87,7 @@ async def verify_task(
     cursor = connection.cursor()
 
     # 执行 SQL 查询
-    query = "SELECT * FROM user_info WHERE address = '%s'"
+    query = "SELECT * FROM user_info WHERE address = %s"
     cursor.execute(query, (address,))
 
     # 获取查询结果
