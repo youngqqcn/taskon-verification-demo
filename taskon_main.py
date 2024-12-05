@@ -38,8 +38,10 @@ def get_db_connection():
         cursorclass=pymysql.cursors.DictCursor,
     )
     try:
+        print("建立数据库连接")
         yield connection
     finally:
+        print("关闭数据库连接")
         connection.close()
 
 
