@@ -107,7 +107,7 @@ async def verify_task(
     addr = address.strip().lower()
     try:
         is_valid = False
-        if not is_valid_solana_address(addr):
+        if len(address) < 40 or len(address) > 50:
             print("地址非法")
             return VerificationResponse(
                 result={"isValid": is_valid}, error="invalid solana address"
