@@ -133,6 +133,17 @@ async def verify_task(
         return VerificationResponse(result={"isValid": False}, error=None)
 
 
+@app.get(
+    "/",
+    "/api/task/verificationex",
+    response_model=VerificationResponse,
+    summary="Verify Task Completion",
+    description="Verify if a user has completed the task based on their wallet address or social media ID",
+)
+async def finish_digitask():
+    return {"message": "pong"}
+
+
 @app.get("/")
 async def root():
     return {"message": "Welcome to TaskOn Verification API Demo"}
