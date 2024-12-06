@@ -5,3 +5,4 @@ python-dotenv
 PyMySQL
 uvicorn
 base58
+requests

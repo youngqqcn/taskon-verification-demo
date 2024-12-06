@@ -8,6 +8,7 @@ import os
 from dotenv import load_dotenv
 import traceback
 import base58
+import requests
 
 # 加载 .env 文件中的环境变量
 load_dotenv()
@@ -41,22 +42,14 @@ def get_db_connection():
         print("建立数据库连接")
         yield connection
     finally:
-        print("关闭数据库连接")
         connection.close()
+        print("关闭数据库连接")
 
 
 # 依赖注入方式提供数据库连接
 def get_db():
     with get_db_connection() as connection:
         yield connection
-
-
-connection = pymysql.connect(
-    host=os.getenv("DB_HOST"),
-    user=os.getenv("DB_USER"),
-    password=os.getenv("DB_PASSWORD"),
-    database=os.getenv("DB_NAME"),
-)
 
 
 app = FastAPI(
@@ -79,18 +72,10 @@ class VerificationResponse(BaseModel):
     result: dict = {"isValid": bool}
     error: Optional[str] = None
 
-
-# DEMO_COMPLETED_TASKS = {
-#     # Demo wallet addresses
-#     "0xd5045deea369d64ab7efab41ad18b82eeabcdefg",
-#     "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
-#     # Demo social accounts
-#     "taskonxyz",
-#     "1084460817220641111",  # Discord ID
-#     "6881505111",  # Telegram ID
-#     "demo@taskon.xyz",
-# }
-
+class SubmitResponse(BaseModel):
+    msg: str
+    code: int
+    data: Optional[dict] = None
 
 @app.get(
     "/api/task/verification",
@@ -116,8 +101,8 @@ async def verify_task(
         # cursor = connection.cursor()
         cursor = db.cursor()
 
-        # 执行 SQL 查询
-        query = "SELECT * FROM user_info WHERE address = %s"
+        # 执行 SQL 查询,  因为 TaskOn传来的都是小写，因此必须要大小写不敏感， 使用 ci
+        query = "SELECT * FROM user_info WHERE LOWER(address) = %s"
         cursor.execute(query, (addr,))
 
         # 获取查询结果
@@ -134,19 +119,63 @@ async def verify_task(
 
 
 @app.get(
-    "/api/task/verificationex",
-    response_model=VerificationResponse,
-    summary="Verify Task Completion",
-    description="Verify if a user has completed the task based on their wallet address or social media ID",
+    "/api/task/submit",
+    response_model=SubmitResponse,
+    summary="submit digitask uid",
+    description="xx",
 )
 async def finish_digitask(
     address: str,
+    userid: str,
     # authorization: Optional[str] = Header(None),
     db=Depends(get_db),
-):
-    return VerificationResponse(result={"isValid": True}, error=None)
+) -> SubmitResponse:
+    print("address = ", address)
+    print("userid = ", userid)
+
+    try:
+
+        try:
+            i = int(userid.strip())
+        except:
+            return SubmitResponse(msg="invalid uid", code=1002)
+
+        if not is_valid_solana_address(address):
+            return SubmitResponse(msg="invalid solana address", code=1001)
+
+        # cursor = connection.cursor()
+        cursor = db.cursor()
+
+        # 执行 SQL 查询,  因为 TaskOn传来的都是小写，因此必须要大小写不敏感， 使用 ci
+        query = "SELECT * FROM user_info WHERE LOWER(address) = %s AND age=0"
+        cursor.execute(query, (address,))
+
+        # 获取查询结果
+        # print("===========")
+        results = cursor.fetchall()
+        print("result: {}".format(results))
+        if results and len(results) > 0:
+            resp = requests.post(
+                "https://api.digitasks.cc/earn/super/check-ref",
+                json={"uid": int(userid.strip())},
+                headers={"Authorization": "LQLe4svC0fLzBgBlLX3kloWAsf8XSDH8gPRUMfTl6Vc="},
+            )
+            print("响应resp: ", resp.text)
+            if resp and '"code":200,' in resp.text:
+                print("响应成功")
+                cursor = db.cursor()
+                cursor.execute("UPDATE user_info SET age=1 WHERE LOWER(address) = %s", (address,))
+                db.commit()
+            return SubmitResponse(msg="ok", code=0)
+
+        print("未找到地址，或者，重复调用")
+        return SubmitResponse(msg="", code=0)
+    except Exception as e:
+        traceback.print_exc()
+        return SubmitResponse(msg="error", code=1005)
+
 
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to TaskOn Verification API Demo"}
+    return {}
