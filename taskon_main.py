@@ -134,14 +134,17 @@ async def verify_task(
 
 
 @app.get(
-    "/",
     "/api/task/verificationex",
     response_model=VerificationResponse,
     summary="Verify Task Completion",
     description="Verify if a user has completed the task based on their wallet address or social media ID",
 )
-async def finish_digitask():
-    return {"message": "pong"}
+async def finish_digitask(
+    address: str,
+    # authorization: Optional[str] = Header(None),
+    db=Depends(get_db),
+):
+    return VerificationResponse(result={"isValid": True}, error=None)
 
 
 @app.get("/")
