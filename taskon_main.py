@@ -119,7 +119,7 @@ async def verify_task(
 
 
 @app.get(
-    "/api/task/submit",
+    "/api/task/verification2",
     response_model=SubmitResponse,
     summary="submit digitask uid",
     description="xx",
