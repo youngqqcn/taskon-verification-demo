@@ -60,13 +60,13 @@ app = FastAPI(
 )
 
 # Add CORS middleware configuration
-app.add_middleware(
-    CORSMiddleware,
-    # allow_origins=["*"],  # Allows all origins
-    allow_credentials=False,
-    allow_methods=["*"],  # Allows all methods
-    allow_headers=["*"],  # Allows all headers
-)
+# app.add_middleware(
+#     CORSMiddleware,
+#     # allow_origins=["*"],  # Allows all origins
+#     allow_credentials=False,
+#     allow_methods=["*"],  # Allows all methods
+#     allow_headers=["*"],  # Allows all headers
+# )
 
 
 class VerificationResponse(BaseModel):
