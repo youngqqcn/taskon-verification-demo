@@ -13,6 +13,7 @@ import requests
 # 加载 .env 文件中的环境变量
 load_dotenv()
 
+assert os.getenv("TASK_TOKEN").strip() != "", "请设置.env中的TASK_TOKEN"
 
 def is_valid_solana_address(address):
     try:
@@ -158,7 +159,7 @@ async def finish_digitask(
             resp = requests.post(
                 "https://api.digitasks.cc/earn/super/check-ref",
                 json={"uid": int(userid.strip())},
-                headers={"Authorization": "LQLe4svC0fLzBgBlLX3kloWAsf8XSDH8gPRUMfTl6Vc="},
+                headers={"Authorization": os.getenv("TASK_TOKEN").strip()},
             )
             print("响应resp: ", resp.text)
             if resp and '"code":200,' in resp.text:
